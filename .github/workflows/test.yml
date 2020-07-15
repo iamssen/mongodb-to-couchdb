@@ -2,6 +2,10 @@ name: CI
 
 on: [push, pull_request]
 
+env:
+  COUCHDB_USER: ${{ secrets.COUCHDB_USER }}
+  COUCHDB_PASSWORD: ${{ secrets.COUCHDB_PASSWORD }}
+
 jobs:
   test:
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
