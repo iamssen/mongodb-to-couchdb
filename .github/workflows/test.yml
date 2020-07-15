@@ -19,9 +19,9 @@ jobs:
 
     steps:
       - name: Set up CouchDB
-        uses: "cobot/couchdb-action@master"
+        uses: iamssen/couchdb-github-action@master
         with:
-          couchdb version: '2.3.1'
+          couchdb-version: '3.1.0'
 
       - name: Clone Repository
         uses: actions/checkout@v2
