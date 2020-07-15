@@ -23,6 +23,10 @@ jobs:
         with:
           couchdb-version: '2.3.1'
 
+      - name: Test CouchDB
+        run: |
+          curl -X PUT -H "Content-Type: application/json; charset=utf-8" -d '{"name": "${{ secrets.COUCHDB_USER }}", "password": "${{ secrets.COUCHDB_PASSWORD }}"}' http://127.0.0.1:5984/_session
+
       - name: Clone Repository
         uses: actions/checkout@v2
 

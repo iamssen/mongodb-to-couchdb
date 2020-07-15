@@ -1,5 +1,5 @@
 export interface SessionParameters {
-  username: string;
+  name: string;
   password: string;
 }
 

@@ -40,7 +40,7 @@ describe('couchdb', () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: process.env.COUCHDB_USER,
+        name: process.env.COUCHDB_USER,
         password: process.env.COUCHDB_PASSWORD,
       } as SessionParameters),
     });
