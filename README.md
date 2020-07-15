@@ -1,10 +1,5 @@
-# Rocket Punch Template
+# Migration scripts MongoDB to CouchDB
 
-- `npm run build`
-- `npm run publish`
-- `npm test`
-
-# Start development
-
-1. Change the directory name `src/sample-package` to you want.
-2. Update `.packages.yaml` file.
+- `migration.test.ts` Migration scripts
+- `@ssen/couchdb` CouchDB helper
+    - See detail more in `@ssen/couchdb/__tests__`
