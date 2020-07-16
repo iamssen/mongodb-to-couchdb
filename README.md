@@ -1,4 +1,4 @@
-# Migration scripts MongoDB to CouchDB
+# Migration scripts for my personal data from MongoDB to CouchDB
 
 - `migration.test.ts` Migration scripts
 - `@ssen/couchdb` CouchDB helper
