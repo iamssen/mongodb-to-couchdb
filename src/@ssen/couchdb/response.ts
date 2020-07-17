@@ -30,7 +30,7 @@ export type Document<T extends {}> = {
   _revisions?: object;
 } & T;
 
-export interface AllDocuments {
+export interface Documents {
   offset: number;
   rows: {
     id: string;
@@ -41,6 +41,16 @@ export interface AllDocuments {
   }[];
   total_rows: number;
   update_seq: number;
+}
+
+export interface View<T extends {}> {
+  offset: number;
+  total_rows: number;
+  rows: {
+    id: string;
+    key: string;
+    value: { _id: string; _rev: string } & T;
+  }[];
 }
 
 export interface Find<T extends {}> {

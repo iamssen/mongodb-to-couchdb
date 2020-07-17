@@ -1,113 +1,19 @@
-import { BulkDocumentsParameters, Fail, Session, SessionParameters } from '@ssen/couchdb';
+import { BulkDocumentsParameters } from '@ssen/couchdb';
 import fs from 'fs-extra';
-import { Db, MongoClient, ObjectID } from 'mongodb';
+import { CouchBody, MongoWeight } from 'model/body';
+import { CouchEarning, CouchExpense, MongoExpense, MongoIncome } from 'model/moneybook';
+import { CouchRescueTime, MongoRescueTime } from 'model/rescuetime';
+import { Db, MongoClient } from 'mongodb';
 import fetch from 'node-fetch';
 import path from 'path';
 
-type Expense = {
-  _id: ObjectID;
-  amount: number;
-  category: string;
-  currency: string;
-  date: Date;
-  description: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type CouchExpense = {
-  amount: number;
-  category: string;
-  currency: string;
-  date: number;
-  description: string;
-};
-
-type Income = {
-  _id: ObjectID;
-  amount: number;
-  category: string;
-  description: string;
-  date: Date;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type CouchEarning = {
-  amount: number;
-  category: string;
-  description: string;
-  date: number;
-};
-
-type RescueTime = {
-  _id: ObjectID;
-  allDistracting: number;
-  allProductive: number;
-  business: number;
-  communicationAndScheduling: number;
-  date: Date;
-  designAndComposition: number;
-  distracting: number;
-  entertainment: number;
-  neutral: number;
-  news: number;
-  productive: number;
-  referenceAndLearning: number;
-  shopping: number;
-  socialNetworking: number;
-  softwareDevelopment: number;
-  total: number;
-  utilities: number;
-  veryDistracting: number;
-  veryProductive: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type CouchRescueTime = {
-  allDistracting: number;
-  allProductive: number;
-  business: number;
-  communicationAndScheduling: number;
-  date: number;
-  designAndComposition: number;
-  distracting: number;
-  entertainment: number;
-  neutral: number;
-  news: number;
-  productive: number;
-  referenceAndLearning: number;
-  shopping: number;
-  socialNetworking: number;
-  softwareDevelopment: number;
-  total: number;
-  utilities: number;
-  veryDistracting: number;
-  veryProductive: number;
-};
-
-type Weight = {
-  _id: ObjectID;
-  date: Date;
-  weight: number;
-  bodyfat: number;
-  waist: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type CouchBody = {
-  date: number;
-  weight: number;
-  bodyfat: number;
-  waist: number;
-};
-
-const store: string = process.env.DATA_STORE || path.join(__dirname, '../store');
+if (!process.env.DATA_STORE) {
+  throw new Error(`Undefined $DATA_STORE env`);
+}
+const store: string = process.env.DATA_STORE;
 fs.mkdirpSync(store);
 
-describe.skip('moneybook migration scripts', () => {
+describe.skip('mongodb to couchdb migration scripts', () => {
   let client: MongoClient;
   let db: Db;
 
@@ -124,45 +30,30 @@ describe.skip('moneybook migration scripts', () => {
     db = client.db(dbName);
 
     // connect couchdb
-    const session = await fetch(`${couchdb.host}/_session`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: process.env.COUCHDB_USER,
-        password: process.env.COUCHDB_PASSWORD,
-      } as SessionParameters),
-    });
-
-    expect(session.status).toBe(200);
-    expect(session.headers.has('set-cookie')).toBeTruthy();
-
-    const sessionBody: Session | Fail = await session.json();
-
-    expect(sessionBody).toMatchObject({ ok: true });
-
     // FIXME prevent auth for does not rewrite data
-    //couchdb.Cookie = session.headers
-    //  .get('set-cookie')!
-    //  .split(',')
-    //  .map((item) => item.split(';')[0])
-    //  .join(';');
+    //couchdb.Cookie = await signInCouchDBCookieAuth({
+    //  host: couchdb.host,
+    //  username: process.env.COUCHDB_USER!,
+    //  password: process.env.COUCHDB_PASSWORD!,
+    //});
     //
-    //expect(typeof couchdb.Cookie).toBe('string');
+    //expect(couchdb.Cookie.length).toBeGreaterThan(0);
   });
 
   afterAll(() => {
     client.close();
   });
 
+  // ---------------------------------------------
+  // mongo to
+  // ---------------------------------------------
   test('should get mongodb collections', async () => {
     const collections = await db.collections();
     console.log(collections.map(({ namespace }) => namespace));
   });
 
-  test('should migration expenses data', async () => {
-    const col = await db.collection<Expense>('expense');
+  test('should migrate expenses data', async () => {
+    const col = await db.collection<MongoExpense>('expense');
     const data = await col.find({}).toArray();
 
     const create = await fetch(`${couchdb.host}/expenses/_bulk_docs`, {
@@ -199,8 +90,8 @@ describe.skip('moneybook migration scripts', () => {
     );
   });
 
-  test('should migration earnings data', async () => {
-    const col = await db.collection<Income>('income');
+  test('should migrate earnings data', async () => {
+    const col = await db.collection<MongoIncome>('income');
     const data = await col.find({}).toArray();
 
     const create = await fetch(`${couchdb.host}/earnings/_bulk_docs`, {
@@ -235,8 +126,8 @@ describe.skip('moneybook migration scripts', () => {
     );
   });
 
-  test('should migration body data', async () => {
-    const col = await db.collection<Weight>('weight');
+  test('should migrate body data', async () => {
+    const col = await db.collection<MongoWeight>('weight');
     const data = await col.find({}).toArray();
 
     const create = await fetch(`${couchdb.host}/body/_bulk_docs`, {
@@ -271,8 +162,8 @@ describe.skip('moneybook migration scripts', () => {
     );
   });
 
-  test('should migration rescuetime data', async () => {
-    const col = await db.collection<RescueTime>('rescuetime');
+  test('should migrate rescuetime data', async () => {
+    const col = await db.collection<MongoRescueTime>('rescuetime');
     const data = await col.find({}).toArray();
 
     const create = await fetch(`${couchdb.host}/rescuetime/_bulk_docs`, {

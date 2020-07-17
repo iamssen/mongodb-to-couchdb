@@ -9,6 +9,10 @@ export interface PutDatabaseParameters {
   partitioned: boolean; // = false
 }
 
+export interface PostAllDocumentsParameters {
+  keys: string[];
+}
+
 export type PostDatabaseParameters<T extends {}> = {
   batch?: 'ok';
 } & T;
@@ -18,6 +22,13 @@ export type PutDocumentParameters<T extends {}> = {
   batch?: 'ok';
   new_edits?: boolean; // = true
 } & T;
+
+export interface BulkGetParameters {
+  docs: {
+    id: string;
+    rev?: string;
+  }[];
+}
 
 export type BulkDocumentsParameters<T extends {}> = {
   docs: ({

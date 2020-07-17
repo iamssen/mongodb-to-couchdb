@@ -1,3 +1,3 @@
-'@ssen/couchdb':
+'@ssen/*':
   version: 0.1.0
   tag: latest
