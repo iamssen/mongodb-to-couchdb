@@ -7,13 +7,13 @@ import { CouchRescueTime } from 'model/rescuetime';
 import fetch from 'node-fetch';
 import path from 'path';
 
-if (!process.env.DATA_STORE) {
-  throw new Error(`Undefined $DATA_STORE env`);
-}
-const store: string = process.env.DATA_STORE;
-fs.mkdirpSync(store);
-
 describe.skip('googlesheet migration scripts', () => {
+  if (!process.env.DATA_STORE) {
+    throw new Error(`Undefined $DATA_STORE env`);
+  }
+  const store: string = process.env.DATA_STORE;
+  fs.mkdirpSync(store);
+
   let auth: Auth.GoogleAuth;
   let sheets: sheets_v4.Sheets;
 

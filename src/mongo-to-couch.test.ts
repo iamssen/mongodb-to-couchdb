@@ -7,13 +7,13 @@ import { Db, MongoClient } from 'mongodb';
 import fetch from 'node-fetch';
 import path from 'path';
 
-if (!process.env.DATA_STORE) {
-  throw new Error(`Undefined $DATA_STORE env`);
-}
-const store: string = process.env.DATA_STORE;
-fs.mkdirpSync(store);
-
 describe.skip('mongodb to couchdb migration scripts', () => {
+  if (!process.env.DATA_STORE) {
+    throw new Error(`Undefined $DATA_STORE env`);
+  }
+  const store: string = process.env.DATA_STORE;
+  fs.mkdirpSync(store);
+
   let client: MongoClient;
   let db: Db;
 

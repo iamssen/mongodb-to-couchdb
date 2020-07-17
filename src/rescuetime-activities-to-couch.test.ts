@@ -6,13 +6,13 @@ import { CouchRescueTime } from 'model/rescuetime';
 import fetch from 'node-fetch';
 import path from 'path';
 
-if (!process.env.DATA_STORE) {
-  throw new Error(`Undefined $DATA_STORE env`);
-}
-const store: string = process.env.DATA_STORE;
-fs.mkdirpSync(store);
-
 describe.skip('rescuetime activities migration scripts', () => {
+  if (!process.env.DATA_STORE) {
+    throw new Error(`Undefined $DATA_STORE env`);
+  }
+  const store: string = process.env.DATA_STORE;
+  fs.mkdirpSync(store);
+
   const couchdb = {
     host: process.env.COUCHDB || 'http://localhost:5984',
     Cookie: '',
@@ -68,7 +68,7 @@ describe.skip('rescuetime activities migration scripts', () => {
             };
           }),
         };
-        
+
         const update = await fetch(`${couchdb.host}/rescuetime/${_id}`, {
           method: 'PUT',
           headers: {
