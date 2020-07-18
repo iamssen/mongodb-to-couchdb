@@ -1,34 +1,13 @@
-import { BulkDocumentsParameters } from '@ssen/couchdb';
 import fs from 'fs-extra';
 import { CouchJournal, Dayone, Journey } from 'model/journal';
-import fetch from 'node-fetch';
 import path from 'path';
+import { getCookie, getStore } from './env';
 
 describe.skip('journal migration scripts', () => {
-  if (!process.env.DATA_STORE) {
-    throw new Error(`Undefined $DATA_STORE env`);
-  }
-  const store: string = process.env.DATA_STORE;
-  fs.mkdirpSync(store);
-
-  const couchdb = {
-    host: process.env.COUCHDB || 'http://localhost:5984',
-    Cookie: '',
-  };
-
-  beforeAll(async () => {
-    // connect couchdb
-    // FIXME prevent auth for does not rewrite data
-    //couchdb.Cookie = await signInCouchDBCookieAuth({
-    //  host: couchdb.host,
-    //  username: process.env.COUCHDB_USER!,
-    //  password: process.env.COUCHDB_PASSWORD!,
-    //});
-
-    expect(couchdb.Cookie.length).toBeGreaterThan(0);
-  });
-
   test.skip('should migrate dayone data', async () => {
+    const store = await getStore();
+    const Cookie = await getCookie();
+
     const { entries }: { entries: Dayone[] } = fs.readJsonSync(path.join(store, 'dayone/Journal.json'));
 
     const attatchments: Map<string, string> = new Map<string, string>();
@@ -87,22 +66,25 @@ describe.skip('journal migration scripts', () => {
       };
     });
 
-    const create = await fetch(`${couchdb.host}/journal/_bulk_docs`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
-      },
-      body: JSON.stringify({
-        docs: data,
-      } as BulkDocumentsParameters<CouchJournal>),
-    });
-
-    expect(create.status).toBe(201);
+    //const create = await fetch(`${host}/journal/_bulk_docs`, {
+    //  method: 'POST',
+    //  headers: {
+    //    Accept: 'application/json',
+    //    'Content-Type': 'application/json',
+    //    Cookie,
+    //  },
+    //  body: JSON.stringify({
+    //    docs: data,
+    //  } as BulkDocumentsParameters<CouchJournal>),
+    //});
+    //
+    //expect(create.status).toBe(201);
   });
 
   test.skip('should migrate journey data', async () => {
+    const store = await getStore();
+    const Cookie = await getCookie();
+
     const files: string[] = fs.readdirSync(path.join(store, 'journey')).filter((file) => /.json$/.test(file));
 
     const data: CouchJournal[] = [];
@@ -148,18 +130,18 @@ describe.skip('journal migration scripts', () => {
       });
     }
 
-    const create = await fetch(`${couchdb.host}/journal/_bulk_docs`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
-      },
-      body: JSON.stringify({
-        docs: data,
-      } as BulkDocumentsParameters<CouchJournal>),
-    });
-
-    expect(create.status).toBe(201);
+    //const create = await fetch(`${host}/journal/_bulk_docs`, {
+    //  method: 'POST',
+    //  headers: {
+    //    Accept: 'application/json',
+    //    'Content-Type': 'application/json',
+    //    Cookie,
+    //  },
+    //  body: JSON.stringify({
+    //    docs: data,
+    //  } as BulkDocumentsParameters<CouchJournal>),
+    //});
+    //
+    //expect(create.status).toBe(201);
   });
 });

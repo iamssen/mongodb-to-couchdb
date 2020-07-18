@@ -1,53 +1,25 @@
-import { BulkDocumentsParameters, View } from '@ssen/couchdb';
+import { View } from '@ssen/couchdb';
 import { parseTimeStringToSeconds } from '@ssen/rescuetime';
 import { parse } from 'date-fns';
 import fs from 'fs-extra';
-import { Auth, google, sheets_v4 } from 'googleapis';
 import { CouchRescueTime } from 'model/rescuetime';
 import fetch from 'node-fetch';
 import path from 'path';
+import { getCookie, getGoogleSheets, getStore, host } from './env';
 
 describe.skip('googlesheet migration scripts', () => {
-  if (!process.env.DATA_STORE) {
-    throw new Error(`Undefined $DATA_STORE env`);
-  }
-  const store: string = process.env.DATA_STORE;
-  fs.mkdirpSync(store);
-
-  let auth: Auth.GoogleAuth;
-  let sheets: sheets_v4.Sheets;
-
-  const couchdb = {
-    host: process.env.COUCHDB || 'http://localhost:5984',
-    Cookie: '',
-  };
-
-  beforeAll(async () => {
-    // connect couchdb
-    // FIXME prevent auth for does not rewrite data
-    //couchdb.Cookie = await signInCouchDBCookieAuth({
-    //  host: couchdb.host,
-    //  username: process.env.COUCHDB_USER!,
-    //  password: process.env.COUCHDB_PASSWORD!,
-    //});
-
-    // connect google sheets
-    auth = new google.auth.GoogleAuth({
-      keyFile: process.env.GOOGLE_KEY,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    sheets = google.sheets({ version: 'v4', auth });
-  });
-
   test.skip('should migrate google sheets rescuetime data', async () => {
+    const store = await getStore();
+    const Cookie = await getCookie();
+    const sheets = getGoogleSheets();
+
     const spreadsheetId = '1kFJfP6kqX6LRXNOHBq5niddhSUbroxrb8bAKChuPeWg';
 
-    const res = await fetch(`${couchdb.host}/rescuetime/_design/all/_view/all-view`, {
+    const res = await fetch(`${host}/rescuetime/_design/all/_view/all-view`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
+        Cookie,
       },
     });
 
@@ -109,32 +81,36 @@ describe.skip('googlesheet migration scripts', () => {
       )
       .filter(({ date }) => date > latest);
 
-    const create = await fetch(`${couchdb.host}/rescuetime/_bulk_docs`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
-      },
-      body: JSON.stringify({
-        docs: rows,
-      } as BulkDocumentsParameters<CouchRescueTime>),
-    });
-
-    expect(create.status).toBe(201);
-
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId,
-      range: '시트1',
-    });
+    //const create = await fetch(`${host}/rescuetime/_bulk_docs`, {
+    //  method: 'POST',
+    //  headers: {
+    //    Accept: 'application/json',
+    //    'Content-Type': 'application/json',
+    //    Cookie,
+    //  },
+    //  body: JSON.stringify({
+    //    docs: rows,
+    //  } as BulkDocumentsParameters<CouchRescueTime>),
+    //});
+    //
+    //expect(create.status).toBe(201);
+    //
+    //await sheets.spreadsheets.values.clear({
+    //  spreadsheetId,
+    //  range: '시트1',
+    //});
   });
 
   test.skip('should add data that is not exists', async () => {
-    const res = await fetch(`${couchdb.host}/rescuetime/_design/all/_view/all-view`, {
+    const store = await getStore();
+    const Cookie = await getCookie();
+    const sheets = getGoogleSheets();
+
+    const res = await fetch(`${host}/rescuetime/_design/all/_view/all-view`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
+        Cookie,
       },
     });
 
@@ -198,18 +174,18 @@ describe.skip('googlesheet migration scripts', () => {
       )
       .filter(({ date }) => !origin.has(date));
 
-    const create = await fetch(`${couchdb.host}/rescuetime/_bulk_docs`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
-      },
-      body: JSON.stringify({
-        docs: rows,
-      } as BulkDocumentsParameters<CouchRescueTime>),
-    });
-
-    expect(create.status).toBe(201);
+    //const create = await fetch(`${host}/rescuetime/_bulk_docs`, {
+    //  method: 'POST',
+    //  headers: {
+    //    Accept: 'application/json',
+    //    'Content-Type': 'application/json',
+    //    Cookie,
+    //  },
+    //  body: JSON.stringify({
+    //    docs: rows,
+    //  } as BulkDocumentsParameters<CouchRescueTime>),
+    //});
+    //
+    //expect(create.status).toBe(201);
   });
 });

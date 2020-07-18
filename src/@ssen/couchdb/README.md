@@ -1,6 +1,6 @@
 # CouchDB Typescript Helper
 
-# Typescript Definitions
+## Typescript Definitions
 <!-- import request.ts -->
 
 ```ts

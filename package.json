@@ -34,6 +34,7 @@
     "eslint": "^7.4.0",
     "eslint-config-prettier": "^6.11.0",
     "fs-extra": "^9.0.1",
+    "google-spreadsheet": "^3.0.11",
     "googleapis": "^54.1.0",
     "husky": "^4.2.5",
     "jest": "^26.1.0",
@@ -43,7 +44,8 @@
     "node-fetch": "^2.6.0",
     "prettier": "^2.0.5",
     "rocket-punch": "^1.0.1",
-    "google-spreadsheet": "^3.0.11",
-    "ts-jest": "^26.1.2"
+    "ts-jest": "^26.1.2",
+    "ts-node": "^8.10.2",
+    "tsconfig-paths": "^3.9.0"
   }
 }

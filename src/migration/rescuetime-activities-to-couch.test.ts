@@ -1,41 +1,22 @@
-import { PutDocumentParameters, View } from '@ssen/couchdb';
+import { View } from '@ssen/couchdb';
 import { parseTimeStringToSeconds } from '@ssen/rescuetime';
 import { parse } from 'date-fns';
 import fs from 'fs-extra';
 import { CouchRescueTime } from 'model/rescuetime';
 import fetch from 'node-fetch';
 import path from 'path';
+import { getCookie, getStore, host } from './env';
 
 describe.skip('rescuetime activities migration scripts', () => {
-  if (!process.env.DATA_STORE) {
-    throw new Error(`Undefined $DATA_STORE env`);
-  }
-  const store: string = process.env.DATA_STORE;
-  fs.mkdirpSync(store);
+  test.skip('should migrate rescuetime activities', async () => {
+    const store = await getStore();
+    const Cookie = await getCookie();
 
-  const couchdb = {
-    host: process.env.COUCHDB || 'http://localhost:5984',
-    Cookie: '',
-  };
-
-  beforeAll(async () => {
-    // connect couchdb
-    // FIXME prevent auth for does not rewrite data
-    //couchdb.Cookie = await signInCouchDBCookieAuth({
-    //  host: couchdb.host,
-    //  username: process.env.COUCHDB_USER!,
-    //  password: process.env.COUCHDB_PASSWORD!,
-    //});
-
-    expect(couchdb.Cookie.length).toBeGreaterThan(0);
-  });
-
-  test('should migrate rescuetime activities', async () => {
-    const res = await fetch(`${couchdb.host}/rescuetime/_design/all/_view/all-view`, {
+    const res = await fetch(`${host}/rescuetime/_design/all/_view/all-view`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Cookie: couchdb.Cookie,
+        Cookie,
       },
     });
 
@@ -69,18 +50,18 @@ describe.skip('rescuetime activities migration scripts', () => {
           }),
         };
 
-        const update = await fetch(`${couchdb.host}/rescuetime/${_id}`, {
-          method: 'PUT',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'If-Match': _rev,
-            Cookie: couchdb.Cookie,
-          },
-          body: JSON.stringify(next as PutDocumentParameters<CouchRescueTime>),
-        });
-
-        expect(update.status).toBe(201);
+        //const update = await fetch(`${host}/rescuetime/${_id}`, {
+        //  method: 'PUT',
+        //  headers: {
+        //    Accept: 'application/json',
+        //    'Content-Type': 'application/json',
+        //    'If-Match': _rev,
+        //    Cookie,
+        //  },
+        //  body: JSON.stringify(next as PutDocumentParameters<CouchRescueTime>),
+        //});
+        //
+        //expect(update.status).toBe(201);
       }
     }
   }, 50000);
